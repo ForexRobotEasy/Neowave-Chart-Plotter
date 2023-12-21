@@ -1,0 +1,136 @@
+
+//+------------------------------------------------------------------+
+//|                             Neowave Chart Plotter                 |
+//|                    Developer's Site: forexroboteasy.com           |
+//|                    Developer: Forex Robot Easy Team               |
+//+------------------------------------------------------------------+
+
+//--- Include necessary libraries
+#include <Trade\Trade.mqh>
+
+//--- Define constants
+#define CHART_TIMEFRAMES_COUNT 3 // Number of supported timeframes
+enum ENUM_TIMEFRAMES
+{
+    TF_YEARLY,  // Yearly
+    TF_MONTHLY, // Monthly
+    TF_WEEKLY   // Weekly
+};
+
+//--- Initialize variables
+CTrade trade; // Trade object
+int currentSymbol; // Current symbol index
+int currentTF; // Current timeframe index
+
+//+------------------------------------------------------------------+
+//|                        OnTick event function                      |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+    //--- Check if the current symbol and timeframe are valid
+    if (currentSymbol >= SymbolsTotal() || currentTF >= CHART_TIMEFRAMES_COUNT)
+        return;
+
+    //--- Get the current high and low prices
+    double currentHigh = High[currentTF];
+    double currentLow = Low[currentTF];
+
+    //--- Plot the wave chart
+    PlotWaveChart(currentHigh, currentLow);
+
+    //--- Check if a trading signal is generated
+    if (CheckTradingSignal(currentHigh, currentLow))
+    {
+        //--- Place a trade
+        trade.Buy(currentSymbol, 1, 0, 0, 0, 0);
+    }
+}
+
+//+------------------------------------------------------------------+
+//|               Function to plot the wave chart                      |
+//+------------------------------------------------------------------+
+void PlotWaveChart(double high, double low)
+{
+    //--- Plot the wave chart based on the NeoWave method
+    // ... Your code here ...
+}
+
+//+------------------------------------------------------------------+
+//|        Function to check for a trading signal                      |
+//+------------------------------------------------------------------+
+bool CheckTradingSignal(double high, double low)
+{
+    //--- Check for a trading signal based on the NeoWave method
+    // ... Your code here ...
+    return false;
+}
+
+//+------------------------------------------------------------------+
+//|                     OnChartEvent event function                    |
+//+------------------------------------------------------------------+
+void OnChartEvent(const int id, const long& lparam, const double& dparam, const string& sparam)
+{
+    //--- Check if a new symbol is selected
+    if (id == CHARTEVENT_CHANGE_SYMBOL)
+    {
+        //--- Update the current symbol index
+        currentSymbol = SymbolInfoInteger(Symbol(), SYMBOL_INDEX);
+    }
+
+    //--- Check if a new timeframe is selected
+    if (id == CHARTEVENT_CHANGE_TIMEFRAME)
+    {
+        //--- Update the current timeframe index
+        currentTF = GetTimeframeIndex();
+    }
+}
+
+//+------------------------------------------------------------------+
+//|             Function to get the current timeframe index            |
+//+------------------------------------------------------------------+
+int GetTimeframeIndex()
+{
+    //--- Get the current timeframe
+    ENUM_TIMEFRAMES timeframe = (ENUM_TIMEFRAMES)Period();
+
+    //--- Return the corresponding index
+    switch (timeframe)
+    {
+        case TF_YEARLY:
+            return 0;
+        case TF_MONTHLY:
+            return 1;
+        case TF_WEEKLY:
+            return 2;
+        default:
+            return -1; // Invalid timeframe
+    }
+}
+
+//+------------------------------------------------------------------+
+//|                     Expert Advisor initialization                 |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    //--- Set initial values for variables
+    currentSymbol = SymbolInfoInteger(Symbol(), SYMBOL_INDEX);
+    currentTF = GetTimeframeIndex();
+
+    //--- Allow trading operations
+    trade.SetExpertMagicNumber(123456);
+
+    //--- Subscribe to chart events
+    ChartSetInteger(0, CHART_EVENT_OBJECT_CLICK, true);
+
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//|                   Expert Advisor deinitialization                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    //--- Unsubscribe from chart events
+    ChartSetInteger(0, CHART_EVENT_OBJECT_CLICK, false);
+}
+
